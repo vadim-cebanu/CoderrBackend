@@ -1,6 +1,6 @@
-# core
+# Coderr Backend
 
-Django project with Django REST Framework automatically generated.
+Django project with Django REST Framework powering the Coderr platform.
 
 
 ## Prerequisites
@@ -84,23 +84,42 @@ python manage.py runserver
 ## API Endpoints
 
 - Admin: http://127.0.0.1:8000/admin/
-- API Root: http://127.0.0.1:8000/api/
+
+Auth & Profiles (`auth_app`):
+- `POST /api/registration/` - Register a new user
+- `POST /api/login/` - Log in and obtain an auth token
+- `GET/PUT/PATCH /api/profile/<pk>/` - Retrieve or update a profile
+- `GET /api/profiles/business/` - List business profiles
+- `GET /api/profiles/customer/` - List customer profiles
+
+Offers (`offers_app`):
+- `GET/POST /api/offers/` - List or create offers
+- `GET/PUT/PATCH/DELETE /api/offers/<pk>/` - Retrieve, update, or delete an offer
+- `GET /api/offerdetails/<pk>/` - Retrieve a single offer detail tier
+
+Orders (`orders_app`):
+- `GET/POST /api/orders/` - List or create orders
+- `GET/PUT/PATCH/DELETE /api/orders/<pk>/` - Retrieve, update, or delete an order
+- `GET /api/order-count/<business_user_id>/` - Count in-progress orders for a business user
+- `GET /api/completed-order-count/<business_user_id>/` - Count completed orders for a business user
+
+Reviews (`reviews_app`):
+- `GET/POST /api/reviews/` - List or create reviews
+- `GET/PUT/PATCH/DELETE /api/reviews/<pk>/` - Retrieve, update, or delete a review
+- `GET /api/base-info/` - Platform-wide statistics (review count, average rating, business profile count, offer count)
 
 ## Structure
 
-- `core/` - Main settings
-- `api/` - Sample app with API
+- `core/` - Main project settings and root URL configuration
+- `auth_app/` - User registration, login, and profiles
+- `offers_app/` - Offers and offer details
+- `orders_app/` - Orders
+- `reviews_app/` - Reviews and platform statistics
+- `tests/` - Test suite
 - `venv/` - Virtual environment
 - `.env` - Environment variables (SECRET_KEY, DEBUG, etc.)
 - `.env.example` - Template for environment variables
 - `manage.py` - Django management script
-
-## Development
-
-To create a superuser:
-```bash
-python manage.py createsuperuser
-```
 
 ## Environment Variables
 
