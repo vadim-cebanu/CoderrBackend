@@ -25,5 +25,8 @@ class Profile(models.Model):
     working_hours = models.CharField(max_length=100, blank=True, default='')
     created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return f"{self.user.username} ({self.type})"
