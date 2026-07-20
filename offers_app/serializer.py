@@ -2,11 +2,14 @@ from rest_framework import serializers
 from .models import OfferDetail, Offer
 from auth_app.models import Profile
 
+
 class OfferDetailSerializer(serializers.ModelSerializer):
     """
     Serializer for OfferDetail model.
 
     Represents a single pricing tier (basic/standard/premium) of an offer.
+    Used both for the standalone /api/offerdetails/{id}/ endpoint and as the
+    writable nested representation when creating/updating an Offer.
     """
     class Meta:
         model = OfferDetail
@@ -16,19 +19,33 @@ class OfferDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class OfferDetailLinkSerializer(serializers.ModelSerializer):
+    """
+    Minimal {id, url} representation of an OfferDetail.
+
+    Used when an Offer is read (list/retrieve) so clients follow the link
+    to /api/offerdetails/{id}/ instead of receiving the full nested object.
+    """
+    url = serializers.HyperlinkedIdentityField(view_name='offerdetail-detail')
+
+    class Meta:
+        model = OfferDetail
+        fields = ['id', 'url']
+
+
 class OfferSerializer(serializers.ModelSerializer):
     """
-    Serializer for Offer model.
+    Read-only serializer for Offer model (list/retrieve).
 
-    Nests all three OfferDetail tiers and exposes computed fields
-    (min_price, min_delivery_time) plus a summary of the creator's profile.
+    Links (not full objects) to each OfferDetail, plus computed fields
+    (min_price, min_delivery_time) and a summary of the creator's profile.
     """
 
-    details = OfferDetailSerializer(many=True)
+    details = OfferDetailLinkSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
     user_details = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Offer
         fields = [
@@ -37,7 +54,7 @@ class OfferSerializer(serializers.ModelSerializer):
             'min_price', 'min_delivery_time', 'user_details'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
-        
+
     def get_min_price(self,obj):
         """
         Return the lowest price among the offer's details, or 0 if none exist.
@@ -59,21 +76,38 @@ class OfferSerializer(serializers.ModelSerializer):
         profile = Profile.objects.filter(user=obj.user).first()
         if profile:
             return {
-                'first_name': profile.first_name or '',
-                'last_name': profile.last_name or '',
+                'first_name': profile.user.first_name or '',
+                'last_name': profile.user.last_name or '',
                 'username': obj.user.username,
             }
         return {}
 
+
+class OfferWriteSerializer(serializers.ModelSerializer):
+    """
+    Writable serializer for Offer model (create/update).
+
+    On create, exactly 3 details (one per offer_type) are required. On
+    (partial) update, only the details being changed need to be sent,
+    matched to existing rows by offer_type.
+    """
+
+    details = OfferDetailSerializer(many=True)
+
+    class Meta:
+        model = Offer
+        fields = ['id', 'title', 'image', 'description', 'details']
+        read_only_fields = ['id']
+
     def validate_details(self, value):
         """
-        Ensure an offer has exactly 3 details, one per unique offer_type.
+        Ensure details have unique offer_types; require exactly 3 on creation.
         """
-        if len(value) != 3:
-            raise serializers.ValidationError("An offer must have exactly 3 details.")
         offer_types = [detail['offer_type'] for detail in value]
-        if len(set(offer_types)) != 3:
+        if len(set(offer_types)) != len(offer_types):
             raise serializers.ValidationError("Each detail must have a unique offer_type.")
+        if self.instance is None and len(value) != 3:
+            raise serializers.ValidationError("An offer must have exactly 3 details.")
         return value
 
     def create(self, validated_data):
