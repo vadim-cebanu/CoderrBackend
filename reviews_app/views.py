@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Avg
+
 from .models import Review
 from .serializers import ReviewSerializer
 from .permissions import IsReviewer
@@ -52,6 +53,26 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a review.
+
+        Only the reviewer can delete their own review.
+        """
+        review = self.get_object()
+
+        if review.reviewer != request.user:
+            return Response(
+                {"error": "You can only delete your own reviews."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Delete the review
+        review.delete()
+
+        # Return 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
