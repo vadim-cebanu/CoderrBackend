@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from .models import Profile
 from .serializers import (
-    UserSerializer, 
+    UserSerializer, ProfileSerializer
 )
 
 @api_view(['POST'])
@@ -77,3 +77,80 @@ def login_view(request):
             {"error": "Invalid credentials."},
             status=status.HTTP_400_BAD_REQUEST
         )
+        
+class ProfileViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Profile model.
+
+    Supports retrieving and updating a user's own profile.
+    """
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Users can only see their own profile.
+        """
+        return self.queryset.filter(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a profile by user ID.
+
+        Overridden to allow looking up by user ID (pk) instead of profile ID.
+        """
+        pk = kwargs.get('pk')
+        profile = self.queryset.filter(user_id=pk).first()
+        if not profile:
+            return Response(
+                {"error": "Profile not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update a profile (PATCH).
+
+        Only the profile owner can update it.
+        """
+        pk = kwargs.get('pk')
+        profile = self.queryset.filter(user_id=pk).first()
+        if not profile:
+            return Response(
+                {"error": "Profile not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if profile.user != request.user:
+            return Response(
+                {"error": "You can only update your own profile."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = self.get_serializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def business_profiles_view(request):
+    """
+    List all business user profiles.
+    """
+    profiles = Profile.objects.filter(type='business')
+    serializer = ProfileSerializer(profiles, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def customer_profiles_view(request):
+    """
+    List all customer user profiles.
+    """
+    profiles = Profile.objects.filter(type='customer')
+    serializer = ProfileSerializer(profiles, many=True)
+    return Response(serializer.data)
