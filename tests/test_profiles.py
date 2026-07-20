@@ -136,20 +136,83 @@ class TestProfileEndpoints(APITestCase):
 
     def test_list_customer_profiles(self):
         """Test retrieval of all customer type profiles.
-        
+
         Validates that:
         - Authenticated user can list customer profiles
         - Response returns status code 200 (OK)
         - Result contains at least one customer profile
         - All returned profiles have type 'customer'
-        
+
         Endpoint: GET /api/profiles/customer/
         """
         self.client.force_authenticate(user=self.customer_user)
         response = self.client.get('/api/profiles/customer/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         date_profile = response.data.get('results') if isinstance(response.data, dict) else response.data
-        
+
         assert len(date_profile) >= 1
         assert date_profile[0]['type'] == 'customer'
+
+    def test_list_own_profile(self):
+        """Test the default router list endpoint, filtered to the caller's own profile.
+
+        Validates that:
+        - Authenticated user can list profiles via GET /api/profile/
+        - Only their own profile is returned (ProfileViewSet.get_queryset filters by user)
+
+        Endpoint: GET /api/profile/
+        """
+        self.client.force_authenticate(user=self.customer_user)
+        response = self.client.get('/api/profile/')
+
+        assert response.status_code == status.HTTP_200_OK
+        results = response.data.get('results') if isinstance(response.data, dict) else response.data
+        assert len(results) == 1
+        assert results[0]['username'] == 'customer1'
+
+    def test_get_profile_not_found(self):
+        """Test retrieving a profile for a non-existent user ID returns 404.
+
+        Endpoint: GET /api/profile/{user_id}/
+        """
+        self.client.force_authenticate(user=self.customer_user)
+        response = self.client.get('/api/profile/999999/')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert 'error' in response.data
+
+    def test_update_profile_not_found(self):
+        """Test updating a profile for a non-existent user ID returns 404.
+
+        Endpoint: PATCH /api/profile/{user_id}/
+        """
+        self.client.force_authenticate(user=self.customer_user)
+        response = self.client.patch('/api/profile/999999/', {'location': 'Berlin'}, format='json')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert 'error' in response.data
+
+    def test_profile_str_representation(self):
+        """Test Profile.__str__ returns 'username (type)'."""
+        assert str(self.customer_profile) == 'customer1 (customer)'
+
+    def test_profile_serializer_never_returns_null_fields(self):
+        """Test ProfileSerializer.to_representation coerces None values to ''.
+
+        Uses in-memory (unsaved) instances so that None can be assigned
+        without violating the model's NOT NULL database constraints.
+        """
+        from auth_app.serializers import ProfileSerializer
+
+        self.customer_user.first_name = None
+        self.customer_user.last_name = None
+        profile = Profile(
+            user=self.customer_user,
+            type='customer',
+            location=None,
+            tel=None,
+            description=None,
+            working_hours=None,
+        )
+        data = ProfileSerializer(profile).data
+        for field in ['first_name', 'last_name', 'location', 'tel', 'description', 'working_hours']:
+            assert data[field] == ''
