@@ -2,33 +2,89 @@
 
 Django project with Django REST Framework automatically generated.
 
+
+## Prerequisites
+
+- Python 3.8 or higher
+- pip (Python package installer)
+
 ## Installation
 
-1. Activate virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - Linux/Mac: `source venv/bin/activate`
+Follow these steps to set up the project locally:
 
-2. Install dependencies (if not already installed):
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. Create Virtual Environment
 
-3. Configure environment variables:
-   - Copy `.env.example` to `.env` (already done during setup)
-   - Update `.env` with your specific settings if needed
+Linux/Mac:
+```bash
+python3 -m venv venv
+```
 
-## Running
+Windows:
+```bash
+python -m venv venv
+```
+
+### 2. Activate Virtual Environment
+
+Linux/Mac:
+```bash
+source venv/bin/activate
+```
+
+Windows:
+```bash
+venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+
+Copy the example environment file and update it with your settings:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and update the following variables:
+- `SECRET_KEY` - Django secret key (generate a new one for production)
+- `DEBUG` - Set to `True` for development, `False` for production
+- `ALLOWED_HOSTS` - Comma-separated list of allowed hosts
+
+To generate a new secret key:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+### 5. Run Database Migrations
+
+```bash
+python manage.py migrate
+```
+
+### 6. Create Superuser (Optional)
+
+To access the Django admin panel:
+
+```bash
+python manage.py createsuperuser
+```
+
+## Running the Application
+
+Start the development server:
 
 ```bash
 python manage.py runserver
 ```
-
 ## API Endpoints
 
 - Admin: http://127.0.0.1:8000/admin/
 - API Root: http://127.0.0.1:8000/api/
-- Hello API: http://127.0.0.1:8000/api/hello/
-- Status Check: http://127.0.0.1:8000/api/hello/status/
 
 ## Structure
 
