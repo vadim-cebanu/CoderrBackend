@@ -3,7 +3,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from auth_app.permissions import IsBusinessUser, IsOwnerOrReadOnly
 from .models import Offer, OfferDetail
-from .serializer import OfferSerializer, OfferWriteSerializer, OfferDetailSerializer
+from .serializers import OfferSerializer, OfferWriteSerializer, OfferDetailSerializer
 from .pagination import OfferPagination
 
 
