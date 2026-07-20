@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     # DRF and extensions
     'rest_framework',
     'corsheaders',
-    'api',
+    'rest_framework.authtoken',
     'coderrbackend',
 ]
 
@@ -130,14 +130,14 @@ STATIC_URL = 'static/'
 
 # Django REST Framework Settings
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
 }
 
 # CORS Settings
