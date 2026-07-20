@@ -3,6 +3,8 @@
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 
+from auth_app.models import Profile
+
 
 class TestAuthentication(APITestCase):
     """Test cases for user authentication, registration, and login functionality.
@@ -25,7 +27,8 @@ class TestAuthentication(APITestCase):
             email='customer1@example.com',
             password='test123asd'
         )
-        
+        Profile.objects.create(user=self.user, type='customer')
+
         if hasattr(self.user, 'profile'):
             self.user.profile.type = 'customer'
             self.user.profile.save()
@@ -79,6 +82,27 @@ class TestAuthentication(APITestCase):
         response = self.client.post('/api/registration/', data, format='json')
         assert response.status_code == 400
         assert 'error' in response.data
+
+    def test_registration_duplicate_username(self):
+        """Test registration failure when the username is already taken.
+
+        Validates that:
+        - Registration fails when the username already exists
+        - Response returns status code 400 (Bad Request)
+        - Serializer errors mention the username field
+
+        Endpoint: POST /api/registration/
+        """
+        data = {
+            'username': 'customer1',
+            'email': 'another@example.com',
+            'password': 'test123asd',
+            'repeated_password': 'test123asd',
+            'type': 'customer'
+        }
+        response = self.client.post('/api/registration/', data, format='json')
+        assert response.status_code == 400
+        assert 'username' in response.data
 
     def test_login_success(self):
         """Test successful user login with valid credentials.
