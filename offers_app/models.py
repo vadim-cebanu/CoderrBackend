@@ -15,8 +15,10 @@ class Offer(models.Model):
     description= models.TextField()
     created_at= models.DateTimeField(default=timezone.now)
     updated_at= models.DateTimeField(auto_now=True)
-    
-    
+
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.title
     
