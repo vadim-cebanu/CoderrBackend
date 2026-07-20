@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from auth_app.models import Profile
 from offers_app.models import Offer, OfferDetail
 from orders_app.models import Order
+from reviews_app.models import Review
 
 
 @pytest.fixture
@@ -50,6 +51,16 @@ def offer(business_user):
         price=500, features=['Logo', 'Brand Guide', 'Social Media Kit'], offer_type='premium'
     )
     return offer
+
+
+@pytest.fixture
+def review(customer_user, business_user):
+    return Review.objects.create(
+        business_user=business_user,
+        reviewer=customer_user,
+        rating=5,
+        description='Great service.',
+    )
 
 
 @pytest.fixture
