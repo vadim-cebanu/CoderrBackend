@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 
 from auth_app.models import Profile
 from offers_app.models import Offer, OfferDetail
+from orders_app.models import Order
 
 
 @pytest.fixture
@@ -49,3 +50,20 @@ def offer(business_user):
         price=500, features=['Logo', 'Brand Guide', 'Social Media Kit'], offer_type='premium'
     )
     return offer
+
+
+@pytest.fixture
+def order(customer_user, offer):
+    detail = offer.details.first()
+    return Order.objects.create(
+        customer_user=customer_user,
+        business_user=offer.user,
+        offer_detail=detail,
+        title=detail.title,
+        revisions=detail.revisions,
+        delivery_time_in_days=detail.delivery_time_in_days,
+        price=detail.price,
+        features=detail.features,
+        offer_type=detail.offer_type,
+        status='in_progress',
+    )
