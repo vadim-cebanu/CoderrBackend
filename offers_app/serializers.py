@@ -103,6 +103,14 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         """
         Ensure details have unique offer_types; require exactly 3 on creation.
         """
+        required_fields = {'title', 'revisions', 'delivery_time_in_days', 'price', 'offer_type'}
+        for detail in value:
+            missing = required_fields - set(detail.keys())
+            if missing:
+                raise serializers.ValidationError(
+                    f"Each detail must include: {', '.join(sorted(missing))}."
+                )
+
         offer_types = [detail['offer_type'] for detail in value]
         if len(set(offer_types)) != len(offer_types):
             raise serializers.ValidationError("Each detail must have a unique offer_type.")
