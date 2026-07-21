@@ -3,12 +3,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from .models import Order
 from .serializers import OrderSerializer
 from .permissions import IsBusinessUserOrCustomer
 from auth_app.permissions import IsBusinessUser, IsCustomerUser
 from django.contrib.auth.models import User
-from rest_framework import status
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -77,12 +77,15 @@ def order_count_view(request, business_user_id):
     """
     Return the number of in-progress orders for a business user.
     """
+    business_user = get_object_or_404(User, id=business_user_id)
+
     count = Order.objects.filter(
         business_user_id=business_user_id, status="in_progress"
     ).count()
     return Response({"order_count": count})
 
 
+@api_view(["GET"]) 
 @permission_classes([IsAuthenticated])
 def completed_order_count_view(request, business_user_id):
     """
@@ -96,14 +99,17 @@ def completed_order_count_view(request, business_user_id):
         business_user = User.objects.get(id=business_user_id)
     except User.DoesNotExist:
         return Response(
-        {"detail": "Business user not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+            {"detail": "Business user not found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
     if not (request.user == business_user or request.user.is_staff):
         return Response(
-        {"detail": "You do not have permission to view these orders."},
-        status=status.HTTP_404_NOT_FOUND, 
-    )
-        count = Order.objects.filter(
+            {"detail": "You do not have permission to view these orders."},
+            status=status.HTTP_403_FORBIDDEN  
+        )
+
+    count = Order.objects.filter(
         business_user_id=business_user_id, status="completed"
-        ).count()
-        return Response({"completed_order_count": count})
+    ).count()
+    return Response({"completed_order_count": count})
