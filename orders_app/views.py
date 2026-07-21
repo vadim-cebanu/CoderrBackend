@@ -71,13 +71,36 @@ class OrderViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+def _get_business_user_or_none(business_user_id):
+    """
+    Return the User only if it exists AND has a business profile.
+    Returns None otherwise (caller responds with 404).
+    """
+    try:
+        user = User.objects.get(id=business_user_id)
+    except User.DoesNotExist:
+        return None
+
+    profile = getattr(user, 'profile', None)
+    if not profile or profile.type != 'business':
+        return None
+
+    return user
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def order_count_view(request, business_user_id):
     """
     Return the number of in-progress orders for a business user.
+    404 if no business user with this ID exists.
     """
-    business_user = get_object_or_404(User, id=business_user_id)
+    business_user = _get_business_user_or_none(business_user_id)
+    if business_user is None:
+        return Response(
+            {"detail": "Business user not found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     count = Order.objects.filter(
         business_user_id=business_user_id, status="in_progress"
@@ -85,28 +108,18 @@ def order_count_view(request, business_user_id):
     return Response({"order_count": count})
 
 
-@api_view(["GET"]) 
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def completed_order_count_view(request, business_user_id):
     """
     Return the number of completed orders for a business user.
-
-    - Checks if the business user exists; returns 404 if not.
-    - Optionally checks if the current user has permission to view these orders.
-    - Returns the count of completed orders for the business user.
+    404 if no business user with this ID exists.
     """
-    try:
-        business_user = User.objects.get(id=business_user_id)
-    except User.DoesNotExist:
+    business_user = _get_business_user_or_none(business_user_id)
+    if business_user is None:
         return Response(
             {"detail": "Business user not found."},
             status=status.HTTP_404_NOT_FOUND
-        )
-
-    if not (request.user == business_user or request.user.is_staff):
-        return Response(
-            {"detail": "You do not have permission to view these orders."},
-            status=status.HTTP_403_FORBIDDEN  
         )
 
     count = Order.objects.filter(
