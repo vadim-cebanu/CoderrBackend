@@ -5,6 +5,7 @@ from auth_app.permissions import IsBusinessUser, IsOwnerOrReadOnly
 from .models import Offer, OfferDetail
 from .serializers import OfferSerializer, OfferWriteSerializer, OfferDetailSerializer
 from .pagination import OfferPagination
+from rest_framework.exceptions import ValidationError
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -51,9 +52,17 @@ class OfferViewSet(viewsets.ModelViewSet):
         if creator_id:
             queryset = queryset.filter(user_id=creator_id)
         if min_price:
-            queryset = queryset.filter(details__price__gte=min_price)
+            try:
+                min_price = float(min_price)
+                queryset = queryset.filter(details__price__gte=min_price)
+            except (ValueError, TypeError):
+                raise ValidationError({"min_price": "Must be a valid number."})
         if max_delivery_time:
-            queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery_time)
+            try:
+                max_delivery_time = int(max_delivery_time)
+                queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery_time)
+            except (ValueError, TypeError):
+                raise ValidationError({"max_delivery_time": "Must be a valid integer."})        
         if search:
             queryset = queryset.filter(
                 models.Q(title__icontains=search) |
