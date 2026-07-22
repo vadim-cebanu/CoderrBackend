@@ -75,7 +75,8 @@ class TestReviewEndpoints:
         """
         api_client.force_authenticate(user=customer_user)
         data = {'rating': 3, 'description': 'Updated review'}
-        response = api_client.patch(f'/api/reviews/{review.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/reviews/{review.id}/', data, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['rating'] == 3
         assert response.data['description'] == 'Updated review'
@@ -88,7 +89,8 @@ class TestReviewEndpoints:
         """
         api_client.force_authenticate(user=business_user)
         data = {'rating': 1}
-        response = api_client.patch(f'/api/reviews/{review.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/reviews/{review.id}/', data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_delete_review_success(self, api_client, customer_user, review):

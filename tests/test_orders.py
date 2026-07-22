@@ -57,7 +57,8 @@ class TestOrderEndpoints:
         """
         api_client.force_authenticate(user=business_user)
         data = {'status': 'completed'}
-        response = api_client.patch(f'/api/orders/{order.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/orders/{order.id}/', data, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['status'] == 'completed'
 
@@ -69,7 +70,8 @@ class TestOrderEndpoints:
         """
         api_client.force_authenticate(user=customer_user)
         data = {'status': 'completed'}
-        response = api_client.patch(f'/api/orders/{order.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/orders/{order.id}/', data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_delete_order_admin_only(self, api_client, customer_user, order):
@@ -103,13 +105,13 @@ class TestOrderEndpoints:
         """
         api_client.force_authenticate(user=business_user)
 
-        # Initially 0 completed
-        response = api_client.get(f'/api/completed-order-count/{business_user.id}/')
+        response = api_client.get(
+            f'/api/completed-order-count/{business_user.id}/')
         assert response.data['completed_order_count'] == 0
 
-        # Update status to completed
         order.status = 'completed'
         order.save()
 
-        response = api_client.get(f'/api/completed-order-count/{business_user.id}/')
+        response = api_client.get(
+            f'/api/completed-order-count/{business_user.id}/')
         assert response.data['completed_order_count'] == 1

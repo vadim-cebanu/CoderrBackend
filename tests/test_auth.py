@@ -15,14 +15,14 @@ class TestAuthentication(APITestCase):
     - Token authentication
     - Profile creation during registration
     """
-   
+
     def setUp(self):
         """Set up test data before each test method.
         
         Creates a test user with customer profile for authentication tests.
         """
-        
-        self.user= User.objects.create_user(
+
+        self.user = User.objects.create_user(
             username='customer1',
             email='customer1@example.com',
             password='test123asd'

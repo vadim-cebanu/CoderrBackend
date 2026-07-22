@@ -13,7 +13,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = OfferDetail
-        fields= [
+        fields = [
             'id', 'title', 'revisions', 'delivery_time_in_days',
             'price', 'features', 'offer_type'
         ]
@@ -55,18 +55,18 @@ class OfferSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
-    def get_min_price(self,obj):
+    def get_min_price(self, obj):
         """
         Return the lowest price among the offer's details, or 0 if none exist.
         """
         details = obj.details.all()
         return min(detail.price for detail in details) if details else 0
 
-    def get_min_delivery_time(self,obj):
+    def get_min_delivery_time(self, obj):
         """
         Return the shortest delivery time among the offer's details, or 0 if none exist.
         """
-        details=obj.details.all()
+        details = obj.details.all()
         return min(detail.delivery_time_in_days for detail in details) if details else 0
 
     def get_user_details(self, obj):
@@ -103,7 +103,8 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         """
         Ensure details have unique offer_types; require exactly 3 on creation.
         """
-        required_fields = {'title', 'revisions', 'delivery_time_in_days', 'price', 'offer_type'}
+        required_fields = {'title', 'revisions',
+                           'delivery_time_in_days', 'price', 'offer_type'}
         for detail in value:
             missing = required_fields - set(detail.keys())
             if missing:
@@ -113,9 +114,11 @@ class OfferWriteSerializer(serializers.ModelSerializer):
 
         offer_types = [detail['offer_type'] for detail in value]
         if len(set(offer_types)) != len(offer_types):
-            raise serializers.ValidationError("Each detail must have a unique offer_type.")
+            raise serializers.ValidationError(
+                "Each detail must have a unique offer_type.")
         if self.instance is None and len(value) != 3:
-            raise serializers.ValidationError("An offer must have exactly 3 details.")
+            raise serializers.ValidationError(
+                "An offer must have exactly 3 details.")
         return value
 
     def create(self, validated_data):

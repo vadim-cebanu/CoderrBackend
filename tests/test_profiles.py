@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from auth_app.models import Profile 
+from auth_app.models import Profile
 
 
 class TestProfileEndpoints(APITestCase):
@@ -25,14 +25,15 @@ class TestProfileEndpoints(APITestCase):
         - customer_user: A customer type profile for testing customer operations
         - business_user: A business type profile for testing business operations
         """
-      
+
         self.customer_user = User.objects.create_user(
             username='customer1',
             email='customer1@example.com',
             password='test123asd'
         )
-       
-        self.customer_profile, created = Profile.objects.get_or_create(user=self.customer_user)
+
+        self.customer_profile, created = Profile.objects.get_or_create(
+            user=self.customer_user)
         self.customer_profile.type = 'customer'
         self.customer_profile.save()
 
@@ -41,7 +42,8 @@ class TestProfileEndpoints(APITestCase):
             email='business1@example.com',
             password='test123asd'
         )
-        self.business_profile, created = Profile.objects.get_or_create(user=self.business_user)
+        self.business_profile, created = Profile.objects.get_or_create(
+            user=self.business_user)
         self.business_profile.type = 'business'
         self.business_profile.save()
 
@@ -57,7 +59,7 @@ class TestProfileEndpoints(APITestCase):
         """
         self.client.force_authenticate(user=self.customer_user)
         response = self.client.get(f'/api/profile/{self.customer_user.id}/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         if 'username' in response.data:
             assert response.data['username'] == 'customer1'
@@ -112,7 +114,8 @@ class TestProfileEndpoints(APITestCase):
         response = self.client.patch(
             f'/api/profile/{self.business_user.id}/', data, format='json'
         )
-        assert response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_400_BAD_REQUEST]
+        assert response.status_code in [
+            status.HTTP_403_FORBIDDEN, status.HTTP_400_BAD_REQUEST]
 
     def test_list_business_profiles(self):
         """Test retrieval of all business type profiles.
@@ -127,10 +130,11 @@ class TestProfileEndpoints(APITestCase):
         """
         self.client.force_authenticate(user=self.business_user)
         response = self.client.get('/api/profiles/business/')
-        
+
         assert response.status_code == status.HTTP_200_OK
-        date_profile = response.data.get('results') if isinstance(response.data, dict) else response.data
-        
+        date_profile = response.data.get('results') if isinstance(
+            response.data, dict) else response.data
+
         assert len(date_profile) >= 1
         assert date_profile[0]['type'] == 'business'
 
@@ -149,7 +153,8 @@ class TestProfileEndpoints(APITestCase):
         response = self.client.get('/api/profiles/customer/')
 
         assert response.status_code == status.HTTP_200_OK
-        date_profile = response.data.get('results') if isinstance(response.data, dict) else response.data
+        date_profile = response.data.get('results') if isinstance(
+            response.data, dict) else response.data
 
         assert len(date_profile) >= 1
         assert date_profile[0]['type'] == 'customer'
@@ -167,7 +172,8 @@ class TestProfileEndpoints(APITestCase):
         response = self.client.get('/api/profile/')
 
         assert response.status_code == status.HTTP_200_OK
-        results = response.data.get('results') if isinstance(response.data, dict) else response.data
+        results = response.data.get('results') if isinstance(
+            response.data, dict) else response.data
         assert len(results) == 1
         assert results[0]['username'] == 'customer1'
 
@@ -187,7 +193,8 @@ class TestProfileEndpoints(APITestCase):
         Endpoint: PATCH /api/profile/{user_id}/
         """
         self.client.force_authenticate(user=self.customer_user)
-        response = self.client.patch('/api/profile/999999/', {'location': 'Berlin'}, format='json')
+        response = self.client.patch(
+            '/api/profile/999999/', {'location': 'Berlin'}, format='json')
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert 'error' in response.data
 

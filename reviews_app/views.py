@@ -67,10 +67,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Delete the review
         review.delete()
 
-        # Return 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

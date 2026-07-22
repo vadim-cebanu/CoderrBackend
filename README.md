@@ -108,6 +108,37 @@ Reviews (`reviews_app`):
 - `GET/PUT/PATCH/DELETE /api/reviews/<pk>/` - Retrieve, update, or delete a review
 - `GET /api/base-info/` - Platform-wide statistics (review count, average rating, business profile count, offer count)
 
+## Testing
+
+The project uses `pytest` with `pytest-django`. Settings for the test run are defined in `core/test_settings` and configured via `pytest.ini`.
+
+Run the full test suite:
+
+```bash
+pytest
+```
+
+Run a specific test file:
+
+```bash
+pytest tests/test_offers.py
+```
+
+Run with verbose output:
+
+```bash
+pytest -v
+```
+
+Test files (in `tests/`):
+- `test_auth.py` - Registration, login, and authentication
+- `test_profiles.py` - Business and customer profiles
+- `test_offers.py` - Offers and offer details
+- `test_orders.py` - Orders, order counts, and completed order counts
+- `test_reviews.py` - Reviews
+- `test_base_info.py` - Platform-wide statistics endpoint
+- `test_permissions.py` - Permission and access control checks
+
 ## Structure
 
 - `core/` - Main project settings and root URL configuration

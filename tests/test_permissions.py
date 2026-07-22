@@ -18,7 +18,8 @@ class TestIsCustomerUser:
     """Test cases for the IsCustomerUser permission."""
 
     def test_allows_customer_user(self, db):
-        user = User.objects.create_user(username='cust1', password='test123asd')
+        user = User.objects.create_user(
+            username='cust1', password='test123asd')
         Profile.objects.create(user=user, type='customer')
         request = APIRequestFactory().get('/')
         request.user = user
@@ -51,8 +52,10 @@ class TestIsReviewer:
         assert IsReviewer().has_object_permission(request, None, obj)
 
     def test_unsafe_method_denied_for_non_reviewer(self, db):
-        owner = User.objects.create_user(username='owner1', password='test123asd')
-        other = User.objects.create_user(username='other1', password='test123asd')
+        owner = User.objects.create_user(
+            username='owner1', password='test123asd')
+        other = User.objects.create_user(
+            username='other1', password='test123asd')
         request = APIRequestFactory().patch('/')
         request.user = other
         obj = FakeReviewedObject(reviewer=owner)

@@ -10,6 +10,7 @@ from .serializers import (
     UserSerializer, ProfileSerializer
 )
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def registration_view(request):
@@ -34,12 +35,10 @@ def registration_view(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Create user
-    user = User.objects.create_user(username=username, email=email, password=password)
-    # Create profile
+    user = User.objects.create_user(
+        username=username, email=email, password=password)
     Profile.objects.create(user=user, type=user_type)
 
-    # Create token
     token, _ = Token.objects.get_or_create(user=user)
 
     response_data = {
@@ -77,7 +76,8 @@ def login_view(request):
             {"error": "Invalid credentials."},
             status=status.HTTP_400_BAD_REQUEST
         )
-        
+
+
 class ProfileViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Profile model.
@@ -128,7 +128,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 {"error": "You can only update your own profile."},
                 status=status.HTTP_403_FORBIDDEN
             )
-        serializer = self.get_serializer(profile, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

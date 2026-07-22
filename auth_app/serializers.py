@@ -14,8 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email']
 
 
-
-
 class ProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for the Profile model.
@@ -54,13 +52,16 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         instance.location = validated_data.get('location', instance.location)
         instance.tel = validated_data.get('tel', instance.tel)
-        instance.description = validated_data.get('description', instance.description)
-        instance.working_hours = validated_data.get('working_hours', instance.working_hours)
+        instance.description = validated_data.get(
+            'description', instance.description)
+        instance.working_hours = validated_data.get(
+            'working_hours', instance.working_hours)
         instance.file = validated_data.get('file', instance.file)
 
         instance.save()
         return instance
-    
+
+
 class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField()
     email = serializers.EmailField()

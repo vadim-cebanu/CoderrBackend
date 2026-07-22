@@ -112,7 +112,8 @@ class TestOfferEndpoints:
         """
         api_client.force_authenticate(user=business_user)
         data = {'title': 'Updated Website Design'}
-        response = api_client.patch(f'/api/offers/{offer.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/offers/{offer.id}/', data, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['title'] == 'Updated Website Design'
 
@@ -124,7 +125,8 @@ class TestOfferEndpoints:
         """
         api_client.force_authenticate(user=customer_user)
         data = {'title': 'Hacked Title'}
-        response = api_client.patch(f'/api/offers/{offer.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/offers/{offer.id}/', data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_delete_offer_success(self, api_client, business_user, offer):
@@ -161,7 +163,8 @@ class TestOfferEndpoints:
         """
         Test that user_details falls back to {} when the offer's creator has no Profile.
         """
-        orphan_user = User.objects.create_user(username='noprofile', password='test123asd')
+        orphan_user = User.objects.create_user(
+            username='noprofile', password='test123asd')
         orphan_offer = Offer.objects.create(
             user=orphan_user, title='Orphan Offer', description='No profile owner.'
         )
@@ -243,9 +246,11 @@ class TestOfferEndpoints:
                 },
             ]
         }
-        response = api_client.patch(f'/api/offers/{offer.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/offers/{offer.id}/', data, format='json')
         assert response.status_code == status.HTTP_200_OK
-        updated_basic = OfferDetail.objects.get(offer=offer, offer_type='basic')
+        updated_basic = OfferDetail.objects.get(
+            offer=offer, offer_type='basic')
         assert float(updated_basic.price) == 150
         assert updated_basic.revisions == 3
 
@@ -253,7 +258,8 @@ class TestOfferEndpoints:
         """
         Test filtering offers by creator_id query param.
         """
-        response = api_client.get(f'/api/offers/?creator_id={business_user.id}')
+        response = api_client.get(
+            f'/api/offers/?creator_id={business_user.id}')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 1
 
@@ -363,12 +369,15 @@ class TestOfferEndpoints:
                 }
             ]
         }
-        response = api_client.patch(f'/api/offers/{offer.id}/', data, format='json')
+        response = api_client.patch(
+            f'/api/offers/{offer.id}/', data, format='json')
         assert response.status_code == status.HTTP_200_OK
 
-        updated_basic = OfferDetail.objects.get(offer=offer, offer_type='basic')
+        updated_basic = OfferDetail.objects.get(
+            offer=offer, offer_type='basic')
         assert float(updated_basic.price) == 120
-        untouched_standard = OfferDetail.objects.get(offer=offer, offer_type='standard')
+        untouched_standard = OfferDetail.objects.get(
+            offer=offer, offer_type='standard')
         assert float(untouched_standard.price) == 200
 
     def test_offerdetail_retrieve_success(self, api_client, customer_user, offer):

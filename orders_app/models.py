@@ -30,7 +30,8 @@ class Order(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     features = models.JSONField(default=list)
     offer_type = models.CharField(max_length=10)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='in_progress')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

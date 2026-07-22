@@ -26,12 +26,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         business_user = data.get('business_user')
         reviewer = request.user
 
-        # Check if reviewer is a customer
-        profile = Profile.objects.filter(user=reviewer, type='customer').first()
+        profile = Profile.objects.filter(
+            user=reviewer, type='customer').first()
         if not profile:
-            raise serializers.ValidationError("Only customer users can create reviews.")
+            raise serializers.ValidationError(
+                "Only customer users can create reviews.")
 
-        # Check for existing review
         if Review.objects.filter(business_user=business_user, reviewer=reviewer).exists():
             raise serializers.ValidationError(
                 "You have already reviewed this business user."

@@ -60,9 +60,11 @@ class OfferViewSet(viewsets.ModelViewSet):
         if max_delivery_time:
             try:
                 max_delivery_time = int(max_delivery_time)
-                queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery_time)
+                queryset = queryset.filter(
+                    details__delivery_time_in_days__lte=max_delivery_time)
             except (ValueError, TypeError):
-                raise ValidationError({"max_delivery_time": "Must be a valid integer."})        
+                raise ValidationError(
+                    {"max_delivery_time": "Must be a valid integer."})
         if search:
             queryset = queryset.filter(
                 models.Q(title__icontains=search) |
@@ -71,7 +73,8 @@ class OfferViewSet(viewsets.ModelViewSet):
         if ordering == 'updated_at':
             queryset = queryset.order_by('updated_at')
         elif ordering == 'min_price':
-            queryset = queryset.annotate(min_price=models.Min('details__price')).order_by('min_price')
+            queryset = queryset.annotate(min_price=models.Min(
+                'details__price')).order_by('min_price')
 
         return queryset.distinct()
 
